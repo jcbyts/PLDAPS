@@ -190,7 +190,7 @@ if p.trial.eyelink.use
     [~, p.trial.eyelink.EYE_USED] = Eyelink('ReadFromTracker', 'active_eye');
     
     [~, isBino] = Eyelink('ReadFromTracker', 'binocular_enabled');
-    if isBino
+    if str2double(isBino)
         p.trial.eyelink.EYE_USED = 'BINO';
     end
     
