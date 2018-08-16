@@ -130,6 +130,7 @@ function p = run(p)
             % Eye tracking
             %-------------------------------------------------------------------------%
             pds.eyelink.setup(p);
+            pds.arrington.setup(p);
                 
             % Audio
             %-------------------------------------------------------------------------%
@@ -350,6 +351,8 @@ function p = run(p)
     Priority(0);
     
     pds.eyelink.finish(p);  % p =  ; These should be operating on pldaps class handles, thus no need for outputs. --tbc.
+    pds.arrington.finish(p);
+    
     pds.plexon.finish(p);
     if(p.defaultParameters.datapixx.use)
         % stop adc data collection

@@ -174,6 +174,12 @@ function s=pldapsClassDefaultParameters(s)
  s.	plexon.	spikeserver.	selfport = 3332;
  s.	plexon.	spikeserver.	use = 0;
  s. plexon. spikeserver.    spikeCount = 0;
+ 
+ % arrington eyetracker
+ s. arrington. use          = false;
+ s. arrington. useAsEyepos  = false;
+ s. arrington. calibration_matrix = [];
+ s. arrington. eyeIdx       = 1;
 
 %s.	session.
  s.	session.	experimentSetupFile = [ ];
