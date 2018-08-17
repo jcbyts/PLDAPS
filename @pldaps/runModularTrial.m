@@ -36,6 +36,10 @@ function p = runModularTrial(p, replay)
     if p.trial.pldaps.maxPriority
         oldPriority=Priority;
         maxPriority=MaxPriority('GetSecs');
+        if IsWin % 1 = High. Priority(2) will return 1.
+            maxPriority = 1;
+        end
+        
         if oldPriority < maxPriority
                 Priority(maxPriority);
         end

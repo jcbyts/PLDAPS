@@ -348,7 +348,7 @@ function p = run(p)
     % return cursor and command-line control
     ShowCursor;
     ListenChar(0);
-    Priority(0);
+    Priority(0); % set to normal priority during setup
     
     pds.eyelink.finish(p);  % p =  ; These should be operating on pldaps class handles, thus no need for outputs. --tbc.
     pds.arrington.finish(p);

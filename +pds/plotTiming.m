@@ -1,4 +1,8 @@
-function tdat = plotTiming(p)
+function tdat = plotTiming(p, plotStateTimes)
+
+if nargin<2
+    plotStateTimes = false;
+end
 
 if nargin<1
     fprintf(2, 'Functionified! %s needs pldaps ''p'' struct or PDS struct input; returns handle to histo. Try:\n\t h = plotTiming(p)\n',mfilename);
@@ -90,4 +94,36 @@ if renderTimesToo
         tdat.fr = fr;
     end
 end
+
+%% plot individual trial state transition time
+if plotStateTimes
+    figure;
+    
+    nTrials = numel(trData);
+    for k = 1:nTrials
+        subplot(2,1,1)
+        plot(trData{k}.timing.frameStateChangeTimes(p.trial.pldaps.trialStates.frameFlip,:)*1000, '-'); hold on
+        
+        
+        subplot(2,1,2)
+        plot(trData{k}.timing.frameStateChangeTimes(1,:)*1000, '-'); hold on
+        xlabel('Frame #')
+        ylabel('milliseconds')
+    end
+end
+
+subplot(2,1,1)
+plot(xlim, p.trial.display.ifi*1e3*[1 1], 'k--')
+axis tight
+xlabel('Frame #')
+ylabel('milliseconds')
+title('Flip Time')
+
+subplot(2,1,2)
+plot(xlim, p.trial.display.ifi*1e3*[1 1], 'k--')
+axis tight
+xlabel('Frame #')
+ylabel('milliseconds')
+title('Minimum Non Drawing Time (Large values here reflect OS or drawing failures)')
+
 
