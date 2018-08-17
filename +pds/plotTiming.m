@@ -115,6 +115,8 @@ end
 subplot(2,1,1)
 plot(xlim, p.trial.display.ifi*1e3*[1 1], 'k--')
 axis tight
+yd = ylim;
+ylim([0 yd(2)])
 xlabel('Frame #')
 ylabel('milliseconds')
 title('Flip Time')
@@ -122,6 +124,8 @@ title('Flip Time')
 subplot(2,1,2)
 plot(xlim, p.trial.display.ifi*1e3*[1 1], 'k--')
 axis tight
+yd = ylim;
+ylim([0 yd(2)])
 xlabel('Frame #')
 ylabel('milliseconds')
 title('Minimum Non Drawing Time (Large values here reflect OS or drawing failures)')
