@@ -5,8 +5,8 @@ function [dv] = dvmergefield(dv,defaults,nowarning)
 % Input:
 %  dv       [struct] - options struct with fields and values
 %  default  [struct] - struct with the default argument values
-%  warning [logical] - warn if a field is present in dv that is not present
-%                      in defaults
+%  nowarning [logical] - don't warn if a field is present in dv that is not present
+%                        in defaults
 % Output:
 %  dv [struct] - the merged options struct
 
@@ -21,7 +21,7 @@ for ii = 1:length(fn)
     end
 end
 
-if nowarning
+if ~nowarning
     fn = fieldnames(dv);
     for ii = 1:length(fn)
         if ~isfield(defaults,fn{ii});
