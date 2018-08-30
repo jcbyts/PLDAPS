@@ -3,7 +3,7 @@ function p = openScreen(p)
 %              decives like datapixx.
 %
 % required fields
-% p.defaultParameters.display.
+% p.trial.display.
 %   stereoMode      [double] -  0 is no stereo
 %   normalizeColor  [boolean] - 1 normalized color range on PTB screen
 %   useOverlay      [double]  - 0,1,2 opens different overlay windows
@@ -426,3 +426,5 @@ p.trial.display.black = BlackIndex(p.trial.display.ptr);
 %% Flip screen to get initial timestamp & finish
 p.trial.display.t0 = Screen('Flip', p.trial.display.ptr);
 
+% Setup PLDAPS experiment condition
+p.trial.pldaps.maxFrames = p.trial.pldaps.maxTrialLength * p.trial.display.frate;
