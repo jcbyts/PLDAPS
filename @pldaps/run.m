@@ -92,7 +92,7 @@ p = beginExperiment(p);
             
             % setup trial parameters
            if ~isempty(p.conditions)
-               p.trial = catstruct(p.defaultParameters, p.conditions{p.defaultParameters.pldaps.iTrial});
+               p.trial = mergeStruct(p.defaultParameters, p.conditions{p.defaultParameters.pldaps.iTrial});
            else
                p.trial = p.defaultParameters;
            end
