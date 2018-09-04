@@ -214,27 +214,34 @@ p = beginExperiment(p);
         runStateforModules(p,'experimentCleanUp',moduleNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
     end
     
+    % --- save pldaps
     if ~p.defaultParameters.pldaps.nosave
-        [structs,structNames] = p.defaultParameters.getAllStructs();
+%         [structs,structNames] = p.defaultParameters.getAllStructs();
         
         PDS = struct;
-        PDS.initialParameters = structs(baseParamsLevels);
-        PDS.initialParameterNames = structNames(baseParamsLevels);
-        PDS.initialParameterIndices = baseParamsLevels;
-        % Include a less user-hostile output struct
-        if p.defaultParameters.pldaps.save.initialParametersMerged
-            % Should be noted that baseParamsLevels may have been changed throughout
-            % course of experiment, so this merged struct could be misleading.
-            % ...activeLevels now documented for every trial though:    data{}.pldaps.activeLevels
-            PDS.initialParametersMerged = mergeToSingleStruct(p.defaultParameters);
-        end
-        
-        levelsCondition = 1:length(structs);
-        levelsCondition(ismember(levelsCondition,baseParamsLevels)) = [];
-        PDS.conditions = structs(levelsCondition);
-        PDS.conditionNames = structNames(levelsCondition);
-        PDS.data = p.data; 
-        PDS.functionHandles = p.functionHandles; %#ok<STRNU>
+        PDS.initialParametersMerged = p.defaultParameters;
+        PDS.conditions = p.conditions;
+        PDS.trial = p.trial;
+        PDS.data = p.data;
+        PDS.functionHandles = p.functionHandles;
+%         
+%         PDS.initialParameters = structs(baseParamsLevels);
+%         PDS.initialParameterNames = structNames(baseParamsLevels);
+%         PDS.initialParameterIndices = baseParamsLevels;
+%         % Include a less user-hostile output struct
+%         if p.defaultParameters.pldaps.save.initialParametersMerged
+%             % Should be noted that baseParamsLevels may have been changed throughout
+%             % course of experiment, so this merged struct could be misleading.
+%             % ...activeLevels now documented for every trial though:    data{}.pldaps.activeLevels
+%             PDS.initialParametersMerged = mergeToSingleStruct(p.defaultParameters);
+%         end
+%         
+%         levelsCondition = 1:length(structs);
+%         levelsCondition(ismember(levelsCondition,baseParamsLevels)) = [];
+%         PDS.conditions = structs(levelsCondition);
+%         PDS.conditionNames = structNames(levelsCondition);
+%         PDS.data = p.data; 
+%         PDS.functionHandles = p.functionHandles; %#ok<STRNU>
         savedFileName = fullfile(p.defaultParameters.session.dir, p.defaultParameters.session.file);
         if p.defaultParameters.pldaps.save.v73
             save(savedFileName,'PDS','-mat','-v7.3')
