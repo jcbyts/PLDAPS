@@ -25,13 +25,16 @@ end
 
 
 %% Sort module execution by requested .stateFunction.order:
-%      -Inf to 0 Default to Inf, (...Nan even after Inf, but don't do that)
+% 0 Default to Inf
+
 % If no order specified, defaults to Inf.
 moduleOrder = inf(size(moduleNames));
+
 % if .order defined, retrieve it
 hasOrder = cellfun(@(x) isfield(p.trial.(x).stateFunction,'order'), moduleNames);
 moduleOrder(hasOrder) = cellfun(@(x) p.trial.(x).stateFunction.order, moduleNames(hasOrder));
-[moduleOrder,so]=sort(moduleOrder);
+
+[moduleOrder,so] = sort(moduleOrder);
 moduleNames = moduleNames(so);
 moduleNames = moduleNames(:)'; % enforce row vector (TODO: column better?)
 
@@ -66,7 +69,7 @@ moduleRequestedStates = cellfun(@(x)...
                                 moduleNames)),... % end @(x) customFxn
                         availiableStates, 'UniformOutput', false);
 
-% not totally clear what this special case is...backwards compatibility?
+% PLDAPS has a default trial function (used to pull from 
 if isfield(p.trial.pldaps,'trialFunction') && ~isempty(p.trial.pldaps.trialFunction)
     beforeZero = find(moduleOrder < 0);
     afterZero  = find(moduleOrder >=0);
@@ -78,16 +81,8 @@ if isfield(p.trial.pldaps,'trialFunction') && ~isempty(p.trial.pldaps.trialFunct
     for iState=1:length(moduleRequestedStates)
         moduleRequestedStates{iState} = [moduleRequestedStates{iState}(beforeZero) true moduleRequestedStates{iState}(afterZero)];
     end
-%     moduleOrder = [{0} moduleOrder];
+
     moduleLocationInputs = [moduleLocationInputs(beforeZero) false moduleLocationInputs(afterZero)];
-%    % place at end    
-%     moduleNames{end+1}='stimulus';
-%     moduleFunctionHandles{end+1}=str2func(p.trial.pldaps.trialFunction);
-%     for iState=1:length(moduleRequestedStates)
-%         moduleRequestedStates{iState}(end+1)=true;
-%     end
-%     moduleOrder(end+1)=0; %#ok<NASGU>
-%     moduleLocationInputs(end+1)=false;
 end
 
 % Format requested states to a struct of each available trialState, with logical flags for each module
@@ -106,6 +101,3 @@ moduleRequestedStates=cellfun(@(x) find(x), moduleRequestedStates, 'UniformOutpu
     moduleRequestedStates=cellfun(@(x) reshape(x,1,numel(x)), moduleRequestedStates, 'UniformOutput', false);
 
 moduleRequestedStates=cell2struct(moduleRequestedStates,availiableStates);
-
-
-end % end of function

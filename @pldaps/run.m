@@ -21,21 +21,18 @@ p.setupExperimentPreOpenScreen();
 % Open PsychToolbox Screen
 p = openScreen(p);
     
-%% experimentSetupFunction
-%   (i.e. fxn handle input w/ initial pldaps object creation)
-if ~isempty(p.defaultParameters.session.experimentSetupFile) && ~strcmp(p.defaultParameters.session.experimentSetupFile, 'none')
-    feval(p.defaultParameters.session.experimentSetupFile, p);
-end
+% %% experimentSetupFunction
+% %   (i.e. fxn handle input w/ initial pldaps object creation)
+% if ~isempty(p.defaultParameters.session.experimentSetupFile) && ~strcmp(p.defaultParameters.session.experimentSetupFile, 'none')
+%     feval(p.defaultParameters.session.experimentSetupFile, p);
+% end
 
 %% Basic environment initialization
 p.initEnvironment();
     
-            
 %% experimentPostOpenScreen
-if p.trial.pldaps.useModularStateFunctions
-    [moduleNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs] = getModules(p);
-    runStateforModules(p,'experimentPostOpenScreen',moduleNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
-end
+[moduleNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs] = getModules(p);
+runStateforModules(p,'experimentPostOpenScreen',moduleNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
 
         
 %% Last chance to check variables
@@ -70,18 +67,7 @@ p = beginExperiment(p);
     if ~isempty(result)
         disp(result.message)
     end
-        
-% %     %now setup everything for the first trial
-% %     
-% %     % we <will not> have a trialNr counter that the trial function can tamper with?
-% %     % No apparent purpose to this...only invites danger of mismatched data outputs.
-% %     
-% %     % Record of baseline params class levels before start of experiment.
-% %     % NOTE: "levelsPreTrials" --> "baseParamsLevels", since former was misnomer now
-% %     %       that this var must be updated for everytime a non-trial parameters level
-% %     %       is added (e.g. during every pause) --TBC 2017-10
-% %     baseParamsLevels = p.defaultParameters.getAllLevels();  %#ok<*AGROW>
-        
+         
     
     %% Main trial loop
     while p.trial.pldaps.iTrial < p.trial.pldaps.finish && p.trial.pldaps.quit~=2
@@ -90,7 +76,9 @@ p = beginExperiment(p);
             
             p.defaultParameters.pldaps.iTrial = p.defaultParameters.pldaps.iTrial + 1;
             
-            % setup trial parameters
+           % --- Conditions
+           % If there are conditions for this trial, merge them into the
+           % the trial struct
            if ~isempty(p.conditions)
                p.trial = mergeStruct(p.defaultParameters, p.conditions{p.defaultParameters.pldaps.iTrial});
            else
@@ -99,7 +87,8 @@ p = beginExperiment(p);
             
            %---------------------------------------------------------------------% 
            % RUN THE TRIAL
-           p = feval(p.trial.pldaps.trialMasterFunction,  p);
+%            p = feval(p.trial.pldaps.trialMasterFunction,  p);
+           runModularTrial(p);
            
            %---------------------------------------------------------------------%
             
@@ -137,19 +126,7 @@ p = beginExperiment(p);
             
             % Pause experiment. should we halt eyelink, datapixx, etc?
             ptype=p.trial.pldaps.pause.type;
-                        
-% %             % p.trial is once again a pointer after the following call (!)
-% %             p.trial=p.defaultParameters; % NOTE: This step also resets the .pldaps.quit~=0 that triggered execution of this block
-% %             
-% %             % This will ALWAYS create a new 'level' (even if nothing is changed during pause)
-% %             % ...doesn't seem to be the original intention, but allows changes during pause to be carried
-% %             % over without overwriting prior settings, or getting lost in .conditions parameters. --TBC 2017-10
-% %             p.defaultParameters.addLevels({struct}, {sprintf('PauseAfterTrial%dParameters', p.defaultParameters.pldaps.iTrial)});
-% %             % include this new level in the list of baseline hierarchy levels.
-% %             baseParamsLevels = [baseParamsLevels length(p.defaultParameters.getAllLevels())];
-% %             % set baseline levels active (NOTE:  disables all trial-specific levels/params in the process)
-% %             p.defaultParameters.setLevels(baseParamsLevels);
-            
+
             if ptype==1 %0=don't,1 is debugger, 2=pause loop
                 ListenChar(0);
                 ShowCursor;
@@ -164,13 +141,6 @@ p = beginExperiment(p);
             end           
 %             pds.datapixx.refresh(p);
 
-% %             %now I'm assuming that nobody created new levels,
-% %             %but I guess when you know how to do that
-% %             %you should also now how to not skrew things up
-% %             allStructs=p.defaultParameters.getAllStructs();
-% %             if(~isequal(struct,allStructs{end}))
-% %                 baseParamsLevels=[baseParamsLevels length(allStructs)];
-% %             end
         end
         
     end
