@@ -147,13 +147,6 @@ p = beginExperiment(p);
     
     %% Clean up & bookkeeping post-trial execution loop
     
-    %make the session parameterStruct active
-    % NOTE: This potentially obscures hierarchy levels (i.e. "PauseAfterTrial##Parameters") that
-    %       are likely inconsistent throughout session. ...each trial data now includes a list
-    %       of active hierarchy levels in .pldaps.activeLevels. --TBC 2017-10
-%     p.defaultParameters.setLevels(baseParamsLevels);
-%     p.trial = p.defaultParameters;
-    
     % return cursor and command-line control
     ShowCursor;
     ListenChar(0);

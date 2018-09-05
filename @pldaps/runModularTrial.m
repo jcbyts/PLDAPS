@@ -37,7 +37,7 @@ if p.trial.pldaps.maxPriority
 end
 
 % --- TrialPrepare is a Time Critical state
-    runStateforModules(p,'trialPrepare',modules,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
+runStateforModules(p,'trialPrepare',modules,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
 
 %%% MAIN WHILE LOOP %%%
 %-------------------------------------------------------------------------%
