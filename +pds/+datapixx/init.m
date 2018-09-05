@@ -122,11 +122,12 @@ if p.trial.display.useOverlay==1 % Datapixx overlay
         % % which is done in propixx hardware (i.e. 'blackbox' code)
         % %
         bgColor=p.trial.display.bgColor;
-        if isField(p.trial, 'display.gamma.table')
-            bgColor = interp1(linspace(0,1,256),p.trial.display.gamma.table(:,1), p.trial.display.bgColor);
-        elseif isField(p.trial, 'display.gamma.power')
-            % outcolor = incolor ^ EncodingGamma.
-            bgColor =  p.trial.display.bgColor .^ p.trial.display.gamma.power;
+        if isfield(p.trial.display, 'gamma')
+            if isfield(p.trial.display.gamma, 'table')
+                bgColor = interp1(linspace(0,1,256),p.trial.display.gamma.table(:,1), p.trial.display.bgColor);
+            elseif isField(p.trial.display.gamma, 'power')            % outcolor = incolor ^ EncodingGamma.
+                bgColor =  p.trial.display.bgColor .^ p.trial.display.gamma.power;
+            end
         end
         Datapixx('SetVideoClutTransparencyColor', bgColor);
         Datapixx('EnableVideoClutTransparencyColorMode');
@@ -139,20 +140,22 @@ if p.trial.display.useOverlay==1 % Datapixx overlay
         end
         %%% Gamma correction for dual CLUT %%%
         % check if gamma correction has been run on the window pointer
-        if isField(p.trial, 'display.gamma.table')
-            % get size of the combiend CLUT. It should be 512 x 3 (two 256 x 3 CLUTS
-            % on top of eachother).
-            sc = size(combinedClut);
-            
-            % use sc to make a vector of 8-bit color steps from 0-1
-            x = linspace(0,1,sc(1)/2);
-            % use the gamma table to lookup what the values should be
-            y = interp1(x,p.trial.display.gamma.table(:,1), combinedClut(:));
-            % reshape the combined clut back to 512 x 3
-            combinedClut = reshape(y, sc);
-        elseif isField(p.trial, 'display.gamma.power')            
-            combinedClut=combinedClut .^ p.trial.display.gamma.power;
-            
+        if isfield(p.trial.display, 'gamma')
+            if isfield(p.trial.display.gamma, 'table')
+                % get size of the combiend CLUT. It should be 512 x 3 (two 256 x 3 CLUTS
+                % on top of eachother).
+                sc = size(combinedClut);
+                
+                % use sc to make a vector of 8-bit color steps from 0-1
+                x = linspace(0,1,sc(1)/2);
+                % use the gamma table to lookup what the values should be
+                y = interp1(x,p.trial.display.gamma.table(:,1), combinedClut(:));
+                % reshape the combined clut back to 512 x 3
+                combinedClut = reshape(y, sc);
+            elseif isField(p.trial.display.gamma, 'power')
+                combinedClut=combinedClut .^ p.trial.display.gamma.power;
+                
+            end
         end
 
         % Retrieve/update extended Datapixx settings ("VideoStatus")
@@ -202,6 +205,26 @@ elseif p.trial.display.useOverlay==2 % software overlay
     else
         combinedClut = [p.trial.display.monkeyCLUT; p.trial.display.humanCLUT];
     end
+    
+%     %%% Gamma correction for dual CLUT %%%
+%     % check if gamma correction has been run on the window pointer
+%     if isfield(p.trial.display, 'gamma')
+%         if isfield(p.trial.display.gamma, 'table')
+%             % get size of the combiend CLUT. It should be 512 x 3 (two 256 x 3 CLUTS
+%             % on top of eachother).
+%             sc = size(combinedClut);
+%             
+%             % use sc to make a vector of 8-bit color steps from 0-1
+%             x = linspace(0,1,sc(1)/2);
+%             % use the gamma table to lookup what the values should be
+%             y = interp1(x,p.trial.display.gamma.table(:,1), combinedClut(:));
+%             % reshape the combined clut back to 512 x 3
+%             combinedClut = reshape(y, sc);
+%         elseif isField(p.trial.display.gamma, 'power')
+%             combinedClut=combinedClut .^ p.trial.display.gamma.power;
+%             
+%         end
+%     end
 
     % assign values to look up textures
     % Bind relevant texture object:

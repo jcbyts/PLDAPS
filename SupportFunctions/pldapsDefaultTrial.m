@@ -12,6 +12,8 @@ switch state
             p.defaultParameters.pldaps.trialMasterFunction = 'runModularTrial';
         end
         
+        stimuli.clutColors(p)
+        
         % track this git repo
         p = pds.git.track(p, 'calibrationGUI', 'pep');
         
