@@ -138,6 +138,7 @@ if p.trial.display.useOverlay==1 % Datapixx overlay
         else
             combinedClut = [p.trial.display.monkeyCLUT; p.trial.display.humanCLUT];
         end
+        
         %%% Gamma correction for dual CLUT %%%
         % check if gamma correction has been run on the window pointer
         if isfield(p.trial.display, 'gamma')
