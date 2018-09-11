@@ -60,7 +60,14 @@ if p.trial.eyelink.use
         end
         disp('PRESS ENTER TO CONFIRM YOU READ THIS MESSAGE'); pause
         Eyelink('Shutdown')
+        
+        % turn off eyelink
         p.trial.eyelink.use = 0;
+        p.trial.eyelink.useAsEyepos = true;
+        
+        % default to mouse cursor as input
+        p.trial.mouse.use = true;
+        p.trial.mouse.useAsEyepos = true;
         return
     end
     
