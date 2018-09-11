@@ -81,11 +81,17 @@ switch state
             p.trial.(sn).cm = p.trial.(sn).cm0;
         end
         
+        disp('Running Calibration Trial')
+        fprintf('f \tlabel fixation\n')
+        fprintf('e \terase last fixation\n')
+        fprintf('u \tupdate regression\n')
+        fprintf('s \tsave calibration matrix to parameters\n')
+        fprintf('esc \texit calibration and return to previoulsy scheduled trials\n')
 	%--------------------------------------------------------------------------
     % --- Manage stimulus before frame draw
     case p.trial.pldaps.trialStates.frameUpdate
         
-        p.trial.(sn).eyeRaw = p.trial.(sn).cm0 \ [p.trial.eyeX; p.trial.eyeY]';
+        p.trial.(sn).eyeRaw = p.trial.(sn).cm0 \ [p.trial.eyeX; p.trial.eyeY];
         
         rnd = randn(p.trial.(sn).targets.numShown,2);
         p.trial.(sn).targets.xPx = p.trial.(sn).targets.xPx + rnd(:,1);
@@ -111,15 +117,18 @@ switch state
                 p.trial.(sn).fixations(:,p.trial.(sn).iFixation) = [p.trial.(sn).targets.xPx(fixatedTarget); p.trial.(sn).targets.yPx(fixatedTarget); ...
                     p.trial.eyeX; p.trial.eyeY];
                 
+                
+            % [U] key - update calibration matrix
+            elseif  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.uKey)
+                
                 recursiveLeastSquaresUpdate(p, sn)
-            
+                
             % [E] key - remove last fixation
             elseif  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.eKey)
                 
                 p.trial.(sn).iFixation = p.trial.(sn).iFixation - 1;
                 
                 p.trial.(sn).cm = p.trial.(sn).cm0;
-                recursiveLeastSquaresUpdate(p, sn)
                 
             end
         end
@@ -146,6 +155,8 @@ switch state
         
         p.trial.(sn).fixations = p.trial.(sn).fixations(:, 1:p.trial.(sn).iFixation);
         
+        p.trial.(sn).cm0 = p.trial.(sn).cm;
+        
         figure(1); clf
         plot(p.trial.calibration.fixations(1,:), p.trial.calibration.fixations(2,:), 'o')
         
@@ -156,9 +167,29 @@ function recursiveLeastSquaresUpdate(p, sn)
 
 % undo the existing calibration matrix
 n = p.trial.(sn).iFixation;
-xyRaw = p.trial.(sn).cm \ p.trial.(sn).fixations(3:4,1:n);
+xyRaw = p.trial.(sn).cm0 \ p.trial.(sn).fixations(3:4,1:n);
+targXY = p.trial.(sn).fixations(1:2,1:n);
 
-yerror = (p.trial.(sn).fixations(1:2,1:n) - p.trial.(sn).fixations(3:4,1:n))';
+% yerror = (p.trial.(sn).fixations(1:2,1:n) - p.trial.(sn).fixations(3:4,1:n))';
 % use Polyak averaging to approximate Minv
-p.trial.(sn).cm = p + (n^-.5/n) * (xyRaw * yerror)';
+
+
+fun=@(c) sum(sqrt(sum((c*xyRaw - targXY).^2)));
+opts=optimset('maxIter', 50, 'display', 'off');
+p.trial.(sn).cm=fmincon(fun, p.trial.(sn).cm0,[],[],[],[],[],[],[],opts);
+
+% p.trial.(sn).cm = rlsup(p.trial.(sn).cm0, targXY, xyRaw);
+
+function cm = rlsup(cm, target, raw)
+
+learningRate = .1^size(raw,2);
+yerr = (target - cm*raw);
+cm = cm + learningRate*yerr*raw';
+
+% newXY = cm*raw;
+% figure(1); clf
+% plot(newXY(1,:), newXY(2,:), '.'); hold on
+% plot(target(1,:), target(2,:), '.')
+
+
 
