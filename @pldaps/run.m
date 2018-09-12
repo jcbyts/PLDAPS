@@ -79,7 +79,7 @@ p = beginExperiment(p);
            % --- Conditions
            % If there are conditions for this trial, merge them into the
            % the trial struct
-           if ~isempty(p.conditions)
+           if ~isempty(p.conditions) && numel(p.conditions) >= p.defaultParameters.pldaps.iTrial
                p.trial = mergeStruct(p.defaultParameters, p.conditions{p.defaultParameters.pldaps.iTrial});
            else
                p.trial = p.defaultParameters;

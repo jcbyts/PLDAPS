@@ -81,16 +81,28 @@ function s=pldapsClassDefaultParameters(s)
  s.	mouse.	useLocalCoordinates = false;
  s.	mouse.	windowPtr = [ ];
 
-%s.	newEraSyringePump.
- s.	newEraSyringePump.	alarmMode = 1;
- s.	newEraSyringePump.	allowNewDiameter = false;
- s.	newEraSyringePump.	diameter = 38;
- s.	newEraSyringePump.	lowNoiseMode = 0;
- s.	newEraSyringePump.	port = '/dev/cu.usbserial';
- s.	newEraSyringePump.	rate = 2900;
- s.	newEraSyringePump.	triggerMode = 'T2';
- s.	newEraSyringePump.	use = false;
- s.	newEraSyringePump.	volumeUnits = 'ML';
+%  S.newera = true;                    % use the New Era syringe pump to deliver liquid rewards
+% S.pumpCom = 'COM4';                 % COM port the New Era syringe pump
+% S.pumpDiameter = 19.05;             % internal diameter of the juice syringe (mm)
+% S.pumpRate = 10.0;                  % rate to deliver juice (ml/minute)
+% S.pumpDefVol = 0.005;               % default dispensing volume (ml)
+
+ s. newEraSyringePump.  use      = true;
+ s.	newEraSyringePump.	port     = '/dev/cu.usbserial';
+ s.	newEraSyringePump.	diameter = 19.05;
+ s.	newEraSyringePump.  rate     = 10;
+ s.	newEraSyringePump.  vol      = 0.005;
+ 
+% %s.	newEraSyringePump.
+%  s.	newEraSyringePump.	alarmMode = 1;
+%  s.	newEraSyringePump.	allowNewDiameter = false;
+%  s.	newEraSyringePump.	diameter = 38;
+%  s.	newEraSyringePump.	lowNoiseMode = 0;
+%  s.	newEraSyringePump.	port = '/dev/cu.usbserial';
+%  s.	newEraSyringePump.	rate = 2900;
+%  s.	newEraSyringePump.	triggerMode = 'T2';
+%  s.	newEraSyringePump.	use = false;
+%  s.	newEraSyringePump.	volumeUnits = 'ML';
 
 %s.	pldaps.
  s.	pldaps.	experimentAfterTrialsFunction = [ ];
@@ -197,10 +209,26 @@ function s=pldapsClassDefaultParameters(s)
  s. stimulus. stateFunction. requestedStates = struct(...
 	'experimentPostOpenScreen', true, ...
 	'frameUpdate',  true, ...
+    'frameDrawingFinished', true, ...
 	'frameDraw',    true, ...
 	'frameFlip',    true, ...
     'trialSetup',   true, ...
 	'trialPrepare', true, ...
 	'trialItiDraw', true, ...
 	'trialCleanUpandSave', true);
+
+ s. calibration. stateFunction. name = '@defaultCalibrationTrial';
+ s. calibration. stateFunction. order = 1;
+ s. calibration. use   = 0;
+ s. calibration. stateFunction. acceptsLocationInput = true;
+ s. calibration. stateFunction. requestedStates = struct(...
+	'experimentPostOpenScreen', true, ...
+	'frameUpdate',  true, ...
+	'frameDraw',    true, ...
+	'frameFlip',    true, ...
+    'trialSetup',   true, ...
+	'trialPrepare', true, ...
+	'trialItiDraw', true, ...
+	'trialCleanUpandSave', true);
+
 end

@@ -7,7 +7,7 @@ function initializeSession(p)
 %     as well clean slate
 IOPort('CloseAll');
 if ~isfield(p.trial.pldaps,'verbosity')
-    p.trial.pldaps.verbosity = 3;
+    p.trial.pldaps.verbosity = 0;
 end
 Screen('Preference','Verbosity', p.trial.pldaps.verbosity);
 IOPort('Verbosity', p.trial.pldaps.verbosity-1); % quieter
