@@ -35,11 +35,11 @@ switch state
     case p.trial.pldaps.trialStates.frameDraw
         frameDraw(p,sn);
         
-        %         case p.trial.pldaps.trialStates.frameDrawingFinished
-        %             frameDrawingFinished(p);
+    case p.trial.pldaps.trialStates.frameDrawingFinished
+        frameDrawingFinished(p);
         
     case p.trial.pldaps.trialStates.trialItiDraw
-        trialItiDraw(p)
+        trialItiDraw(p);
         
         % Flip a blank screen
         Screen('FillRect', p.trial.display.overlayptr, p.trial.display.bgColor);
@@ -65,7 +65,6 @@ switch state
         
         p.trial.pldaps.maxFrames = p.trial.pldaps.maxTrialLength*p.trial.display.frate;
         
-end
 end
 
 
@@ -103,6 +102,25 @@ if any(p.trial.keyboard.firstPressQ)
     elseif  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.pKey)
         p.trial.pldaps.quit = 1;
         ShowCursor;
+	
+	% [C]alibration
+    elseif  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.cKey)
+        p.trial.flagNextTrial = true;
+%         ShowCursor;
+        modules = getModules(p, false);
+        calibrationModules = {'stimulus', 'calibration'};
+        
+        for i = 1:numel(calibrationModules)
+            s.(calibrationModules{i}).use = true;
+        end
+        
+        modulesToTurnOff = setdiff(modules, calibrationModules);
+        for i = 1:numel(modulesToTurnOff)
+            s.(modulesToTurnOff{i}).use = false;
+        end
+        
+        p.insertConditionNextTrial(s);
+ 
         
         % [Q]uit
     elseif  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.qKey)
@@ -126,14 +144,14 @@ if p.trial.mouse.use
     p.trial.mouse.buttonPressSamples(:,p.trial.mouse.samples) = isMouseButtonDown';
     % Use as eyepos if requested
     if(p.trial.mouse.useAsEyepos)
-        if p.trial.pldaps.eyeposMovAv==1
+%         if p.trial.pldaps.eyeposMovAv==1
             p.trial.eyeX = p.trial.mouse.cursorSamples(1,p.trial.mouse.samples);
             p.trial.eyeY = p.trial.mouse.cursorSamples(2,p.trial.mouse.samples);
-        else
-            mInds=(p.trial.mouse.samples-p.trial.pldaps.eyeposMovAv+1):p.trial.mouse.samples;
-            p.trial.eyeX = mean(p.trial.mouse.cursorSamples(1,mInds));
-            p.trial.eyeY = mean(p.trial.mouse.cursorSamples(2,mInds));
-        end
+%         else
+%             mInds=(p.trial.mouse.samples-p.trial.pldaps.eyeposMovAv+1):p.trial.mouse.samples;
+%             p.trial.eyeX = mean(p.trial.mouse.cursorSamples(1,mInds));
+%             p.trial.eyeY = mean(p.trial.mouse.cursorSamples(2,mInds));
+%         end
     end
 end
 
@@ -144,7 +162,7 @@ pds.datapixx.adc.getData(p);
 pds.arrington.get(p);
 
 % get eyelink data (will override arrington)
-pds.eyelink.getQueue(p);
+pds.eyelink.get(p);
 
 
 %get plexon spikes
@@ -153,7 +171,7 @@ pds.eyelink.getQueue(p);
 % save eye position at each frame
 p.trial.behavior.eyeAtFrame(:,p.trial.iFrame) = [p.trial.eyeX; p.trial.eyeY];
 
-end %frameUpdate
+% end %frameUpdate
 
 
 
@@ -175,18 +193,18 @@ if p.trial.pldaps.draw.framerate.use && p.trial.iFrame>2
     p.trial.pldaps.draw.framerate.data=circshift(p.trial.pldaps.draw.framerate.data,-1);
     p.trial.pldaps.draw.framerate.data(end)=p.trial.timing.flipTimes(1,p.trial.iFrame-1)-p.trial.timing.flipTimes(1,p.trial.iFrame-2);
     %plot
-    if p.trial.pldaps.draw.framerate.show
+%     if p.trial.pldaps.draw.framerate.show
         %adjust y limit
         p.trial.pldaps.draw.framerate.sf.ylims=[0 max(max(p.trial.pldaps.draw.framerate.data), 2*p.trial.display.ifi)];
         %current ifi is solid black
-        pds.pldaps.draw.screenPlot(p.trial.pldaps.draw.framerate.sf, p.trial.pldaps.draw.framerate.sf.xlims, [p.trial.display.ifi p.trial.display.ifi], p.trial.display.clut.blackbg, '-');
+%         pds.pldaps.draw.screenPlot(p.trial.pldaps.draw.framerate.sf, p.trial.pldaps.draw.framerate.sf.xlims, [p.trial.display.ifi p.trial.display.ifi], p.trial.display.clut.blackbg, '-');
         %2 ifi reference is 5 black dots
         pds.pldaps.draw.screenPlot(p.trial.pldaps.draw.framerate.sf, p.trial.pldaps.draw.framerate.sf.xlims(2)*(0:0.25:1), ones(1,5)*2*p.trial.display.ifi, p.trial.display.clut.blackbg, '.');
         %0 ifi reference is 5 black dots
         pds.pldaps.draw.screenPlot(p.trial.pldaps.draw.framerate.sf, p.trial.pldaps.draw.framerate.sf.xlims(2)*(0:0.25:1), zeros(1,5), p.trial.display.clut.blackbg, '.');
         %data are red dots
         pds.pldaps.draw.screenPlot(p.trial.pldaps.draw.framerate.sf, 1:p.trial.pldaps.draw.framerate.nFrames, p.trial.pldaps.draw.framerate.data', p.trial.display.clut.redbg, '.');
-    end
+%     end
 end
 % t1 = GetSecs - t0;
 % disp(t1*1e3)
@@ -207,7 +225,7 @@ if p.trial.pldaps.draw.photodiode.use && mod(p.trial.iFrame, p.trial.pldaps.draw
     p.trial.pldaps.draw.photodiode.dataEnd = p.trial.pldaps.draw.photodiode.dataEnd+1;
     Screen('FillRect', p.trial.display.ptr, [1 1 1]', p.trial.pldaps.draw.photodiode.rect');
 end
-end %frameDraw
+% end %frameDraw
 
 
 %---------------------------------------------------------------------%
@@ -215,7 +233,7 @@ end %frameDraw
 function frameDrawingFinished(p)
 
 Screen('DrawingFinished', p.trial.display.ptr);
-end %frameDrawingFinished
+% end %frameDrawingFinished
 
 
 %---------------------------------------------------------------------%
@@ -233,7 +251,7 @@ end
 
 p.trial.stimulus.timeLastFrame = p.trial.timing.flipTimes(1,p.trial.iFrame)-p.trial.trstart;
 
-end %frameFlip
+% end %frameFlip
 
 
 %---------------------------------------------------------------------%
@@ -316,7 +334,14 @@ end
 
 p.trial.behavior.eyeAtFrame = nan(2, p.trial.pldaps.maxFrames);
 
-end %trialSetup
+% --- clear stimulus Logs if they exist
+modules = getModules(p);
+for iMod = 1:numel(modules)
+    resetStimulusLogs(p.trial.(modules{iMod}))
+end
+
+
+% end %trialSetup
 
 
 %---------------------------------------------------------------------%
@@ -329,7 +354,7 @@ function trialPrepare(p)
 % has less timing issues than Beeper.m -- Beeper freezes flips as long as
 % it is producing sound whereas PsychPortAudio loads a wav file into the
 % buffer and can call it instantly without wasting much compute time.
-pds.audio.clearBuffer(p)
+pds.audio.clearBuffer(p);
 
 % Ensure anything in the datapixx buffer has been pushed/updated
 if p.trial.datapixx.use
@@ -390,7 +415,7 @@ p.trial.timing.syncTimeDuration = 0;    % formerly:  p.trial.ttime;
 p.trial.timing.itiFrameCount = Screen('WaitBlanking', p.trial.display.ptr);
 p.trial.trstart = GetSecs;
 
-end %trialPrepare
+% end %trialPrepare
 
 
 %---------------------------------------------------------------------%
@@ -404,7 +429,7 @@ if p.trial.pldaps.draw.grid.use
 end
 
 
-end
+% end
 
 
 %---------------------------------------------------------------------%
@@ -494,7 +519,24 @@ pds.behavior.reward.cleanUpandSave(p);
 % eye position tracking
 p.trial.behavior.eyeAtFrame = p.trial.behavior.eyeAtFrame(:,1:p.trial.iFrame);
 
-end %cleanUpandSave
+%--- plot frame states
+% -- Get Modules
+[~,~,moduleRequestedStates,~] = getModules(p);
+
+% --- Order Modules
+% order the framestates that we will iterate through each trial by their 
+% value only positive states are frame states. And they will be called in
+% order of the value. Check comments in pldaps.getReorderedFrameStates
+% for explanations of the default states negative states are special states
+% outside of a frame (trial, experiment, etc)
+[stateValue, stateName] = p.getReorderedFrameStates(p.trial.pldaps.trialStates,moduleRequestedStates);
+
+figure(11); clf
+frameStateTime = diff(p.trial.timing.frameStateChangeTimes(stateValue,:))';
+frameStateTime = [p.trial.timing.frameStateChangeTimes(stateValue(1),:)' frameStateTime];
+plot(1e3*frameStateTime); legend(stateName)
+drawnow
+% end %cleanUpandSave
 
 
 
