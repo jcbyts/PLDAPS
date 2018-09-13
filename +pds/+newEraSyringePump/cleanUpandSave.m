@@ -7,8 +7,9 @@ function p = cleanUpandSave(p)
 %
 % jk wrote it 2015
 
-    if p.trial.newEraSyringePump.use
-        [volumeGiven,volumeWithdrawn] = pds.newEraSyringePump.getVolume(p);
-        p.trial.newEraSyringePump.volumeGiven = volumeGiven;
-        p.trial.newEraSyringePump.volumeWithdrawn = volumeWithdrawn;
-    end
+%     if p.trial.newEraSyringePump.use
+% %         [volumeGiven,volumeWithdrawn] = pds.newEraSyringePump.getVolume(p);
+%         volumeGiven = p.trial.reward.volume;
+%         p.trial.newEraSyringePump.volumeGiven = volumeGiven;
+%         p.trial.newEraSyringePump.volumeWithdrawn = volumeWithdrawn;
+%     end

@@ -9,7 +9,10 @@ function p = setup(p)
 %  s.newEraSyringePump.vol      = 0.005;
  
 if p.trial.newEraSyringePump.use, % create an @newera object for delivering liquid reward
-	p.trial.reward = marmoview.newera(p,'port',p.trial.newEraSyringePump.port,'diameter',p.trial.newEraSyringePump.diameter,'volume',p.trial.newEraSyringePump.vol,'rate',s.newEraSyringePump.rate);
+	p.trial.reward = marmoview.newera('port', p.trial.newEraSyringePump.port, ...
+        'diameter',p.trial.newEraSyringePump.diameter,...
+        'volume',p.trial.newEraSyringePump.vol,'rate',...
+        p.trial.newEraSyringePump.rate);
 else % no syringe pump? use the @dbgreward object object instead
     p.trial.reward = marmoview.dbgreward(p);
 end

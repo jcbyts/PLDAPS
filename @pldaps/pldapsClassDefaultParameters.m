@@ -93,6 +93,17 @@ function s=pldapsClassDefaultParameters(s)
  s.	newEraSyringePump.  rate     = 10;
  s.	newEraSyringePump.  vol      = 0.005;
  
+ % jake's rig
+%       alarmMode: 1
+%     allowNewDiameter: 1
+%             diameter: 38
+%         lowNoiseMode: 0
+%                 port: '/dev/ttyUSB0'
+%                 rate: 2900
+%          triggerMode: 'T2'
+%                  use: 1
+%          volumeUnits: 'ML'
+ 
 % %s.	newEraSyringePump.
 %  s.	newEraSyringePump.	alarmMode = 1;
 %  s.	newEraSyringePump.	allowNewDiameter = false;

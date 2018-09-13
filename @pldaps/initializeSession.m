@@ -6,6 +6,8 @@ function initializeSession(p)
 %     no PTB method to retrieve previously opened IOPort handles, so might
 %     as well clean slate
 IOPort('CloseAll');
+instrreset % reset all serial ports
+
 if ~isfield(p.trial.pldaps,'verbosity')
     p.trial.pldaps.verbosity = 0;
 end

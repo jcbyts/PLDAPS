@@ -96,8 +96,10 @@ if any(p.trial.keyboard.firstPressQ)
     
     % [M]anual reward
     if  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.mKey)
-        pds.behavior.reward.give(p);
-        
+%         pds.behavior.reward.give(p);
+%         
+        p.trial.reward.deliver();
+%         toc
         % [P]ause
     elseif  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.pKey)
         p.trial.pldaps.quit = 1;
@@ -340,6 +342,9 @@ for iMod = 1:numel(modules)
     resetStimulusLogs(p.trial.(modules{iMod}))
 end
 
+% clear the reward log
+p.trial.reward.clearlog();
+
 
 % end %trialSetup
 
@@ -444,7 +449,7 @@ Screen('Flip', p.trial.display.ptr, 0, [], 1);
 % this screen, it can now be drawn during the  .trialItiDraw  state.
 % NOTE: This is not a time-critical draw, and async flips do not return a valid timestamp
 %       at time of schedule.
-
+% 
 % Execute all time-sesitive tasks first
 if p.trial.datapixx.use
     p.trial.datapixx.datapixxstoptime = Datapixx('GetTime');
@@ -537,6 +542,7 @@ frameStateTime = [p.trial.timing.frameStateChangeTimes(stateValue(1),:)' frameSt
 plot(1e3*frameStateTime); legend(stateName)
 drawnow
 % end %cleanUpandSave
+% toc
 
 
 

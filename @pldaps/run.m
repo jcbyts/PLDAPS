@@ -37,7 +37,7 @@ runStateforModules(p,'experimentPostOpenScreen',moduleNames,moduleFunctionHandle
         
 %% Last chance to check variables
 if(p.trial.pldaps.pause.type==1 && p.trial.pldaps.pause.preExperiment==true) %0=don't,1 is debugger, 2=pause loop
-    p  %#ok<NOPRT>
+    disp(p)
     disp('Ready to begin trials. Type "dbcont" to start first trial...')
     keyboard
 end
@@ -84,14 +84,16 @@ p = beginExperiment(p);
            else
                p.trial = p.defaultParameters;
            end
-            
+           
            %---------------------------------------------------------------------% 
            % RUN THE TRIAL
 %            p = feval(p.trial.pldaps.trialMasterFunction,  p);
            runModularTrial(p);
            
+           
+%            disp(['before saveTemp valid = ' num2str(isvalid(p.trial.reward.dev))])
            %---------------------------------------------------------------------%
-            
+
            %save tmp data
            result = saveTempFile(p); 
            if ~isempty(result)
@@ -104,24 +106,35 @@ p = beginExperiment(p);
                runStateforModules(p,'experimentAfterTrials',moduleNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
            end
            
-           % make deep copy of trial so the objects in data are unique
-           copytrial = p.trial; %#ok<NASGU>
-           fname = fullfile(p.trial.pldaps.dirs.data,'TEMP', 'deepCopyStruct.mat');
-           save(fname, '-v7.3', '-struct', 'copytrial');
-           clear copytrial
-           copytrial = load(fname);
+
+           % --- make deep copy of trial so the objects in data are unique
            
-           if p.defaultParameters.pldaps.save.mergedData
-               % store the complete trial struct to .data
-               dTrialStruct = copytrial;
-           else
-               % store the difference of the trial struct to .data
-               [~, ~, dTrialStruct] = comp_struct(p.defaultParameters, copytrial);
-           end
+           % if a temp file was saved, just load that
+           tmpFname = fullfile(p.trial.session.dir,'TEMP',[p.trial.session.file(1:end-4) num2str(p.trial.pldaps.iTrial) p.trial.session.file(end-3:end)]);
+            if exist(tmpFname, 'file')
+                clear copytrial
+                copytrial = load(tmpFname, '-mat');
+                copytrial = copytrial.(sprintf('trial%d', p.trial.pldaps.iTrial));
+            else % do new deep copy (save and load)
+                copytrial = p.trial; %#ok<NASGU>
+                fname = fullfile(p.trial.pldaps.dirs.data,'TEMP', 'deepCopyStruct.mat');
+                save(fname, '-v7.3', '-struct', 'copytrial');
+                clear copytrial
+                copytrial = load(fname);
+            end
+            
+            disp(['after deepcopy save valid = ' num2str(isvalid(p.trial.reward.dev))])
+            
+            if p.defaultParameters.pldaps.save.mergedData
+                % store the complete trial struct to .data
+                dTrialStruct = copytrial;
+            else
+                % store the difference of the trial struct to .data
+                [~, ~, dTrialStruct] = comp_struct(p.defaultParameters, copytrial);
+            end
 
            p.data{p.defaultParameters.pldaps.iTrial} = dTrialStruct;
            
-
         else
             
             % Pause experiment. should we halt eyelink, datapixx, etc?
@@ -130,7 +143,6 @@ p = beginExperiment(p);
             if ptype==1 %0=don't,1 is debugger, 2=pause loop
                 ListenChar(0);
                 ShowCursor;
-%                 p.trial
                 disp('Experiment paused. Type "dbcont" to continue...')
                 keyboard %#ok<MCKBD>
                 p.trial.pldaps.quit = 0;
@@ -154,6 +166,8 @@ p = beginExperiment(p);
     
     pds.eyelink.finish(p);  % p =  ; These should be operating on pldaps class handles, thus no need for outputs. --tbc.
     pds.arrington.finish(p);
+    
+    p.trial.reward.close();
     
     pds.plexon.finish(p);
     if(p.defaultParameters.datapixx.use)
