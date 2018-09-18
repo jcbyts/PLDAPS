@@ -65,6 +65,11 @@ switch state
         
         p.trial.pldaps.maxFrames = p.trial.pldaps.maxTrialLength*p.trial.display.frate;
         
+    case p.trial.pldaps.trialStates.experimentCleanUp
+        
+%         fclose(p.trial.reward.dev);
+        p.trial.reward.delete();
+        
 end
 
 
