@@ -5,7 +5,7 @@ function data = getPdsTrialData(PDS)
 % data -> conditions -> initialParameters 
 
 if ~isempty(PDS.conditions)    
-    A = cellfun(@(x) mergeStruct(PDS.initialParametersMerged, x), PDS.conditions, 'uni', 1);
+    A = cellfun(@(x) mergeStruct(PDS.initialParametersMerged, x), PDS.conditions, 'uni', 0);
 else
     A = repmat({PDS.initialParametersMerged}, 1, numel(PDS.data));
 end
