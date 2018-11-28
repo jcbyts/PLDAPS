@@ -5,7 +5,8 @@ function setupExperimentPreOpenScreen(p)
 p.trial.pldaps.modNames.all = getModules(p, 0);
 
 %experimentSetup before openScreen to allow modifyiers
-[moduleNames, moduleFunctionHandles, moduleRequestedStates, moduleLocationInputs] = getModules(p);
+onlyActive = false; % use all modules
+[moduleNames, moduleFunctionHandles, moduleRequestedStates, moduleLocationInputs] = getModules(p, onlyActive);
 
 % run all modules state experimentPreOpenScreen
 moduleRequestedStates.experimentPreOpenScreen = 1:numel(moduleNames);

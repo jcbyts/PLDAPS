@@ -20,18 +20,13 @@ p.setupExperimentPreOpenScreen();
 %% Open PLDAPS windows
 % Open PsychToolbox Screen
 p = openScreen(p);
-    
-% %% experimentSetupFunction
-% %   (i.e. fxn handle input w/ initial pldaps object creation)
-% if ~isempty(p.defaultParameters.session.experimentSetupFile) && ~strcmp(p.defaultParameters.session.experimentSetupFile, 'none')
-%     feval(p.defaultParameters.session.experimentSetupFile, p);
-% end
 
 %% Basic environment initialization
 p.initEnvironment();
     
 %% experimentPostOpenScreen
-[moduleNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs] = getModules(p);
+onlyActive = false; % run all modules post open screen routines
+[moduleNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs] = getModules(p, onlyActive);
 runStateforModules(p,'experimentPostOpenScreen',moduleNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
 
         
@@ -79,7 +74,7 @@ p = beginExperiment(p);
            % --- Conditions
            % If there are conditions for this trial, merge them into the
            % the trial struct
-           if ~isempty(p.conditions) && numel(p.conditions) >= p.defaultParameters.pldaps.iTrial
+           if ~isempty(p.conditions) && numel(p.conditions) >= p.defaultParameters.pldaps.iTrial && ~isempty(p.conditions{p.defaultParameters.pldaps.iTrial})
                p.trial = mergeStruct(p.defaultParameters, p.conditions{p.defaultParameters.pldaps.iTrial});
            else
                p.trial = p.defaultParameters;
@@ -87,13 +82,8 @@ p = beginExperiment(p);
            
            %---------------------------------------------------------------------% 
            % RUN THE TRIAL
-%            p = feval(p.trial.pldaps.trialMasterFunction,  p);
            runModularTrial(p);
            
-           
-%            disp(['before saveTemp valid = ' num2str(isvalid(p.trial.reward.dev))])
-           %---------------------------------------------------------------------%
-
            %save tmp data
            result = saveTempFile(p); 
            if ~isempty(result)
@@ -110,8 +100,13 @@ p = beginExperiment(p);
            % --- make deep copy of trial so the objects in data are unique
            
            % if a temp file was saved, just load that
-           tmpFname = fullfile(p.trial.session.dir,'TEMP',[p.trial.session.file(1:end-4) num2str(p.trial.pldaps.iTrial) p.trial.session.file(end-3:end)]);
-            if exist(tmpFname, 'file')
+           if p.defaultParameters.pldaps.nosave % there are no temp files
+               tmpFname = [];
+           else
+               tmpFname = fullfile(p.trial.session.dir,'TEMP',[p.trial.session.file(1:end-4) num2str(p.trial.pldaps.iTrial) p.trial.session.file(end-3:end)]);
+           end
+           
+            if ~isempty(tmpFname) && exist(tmpFname, 'file')
                 clear copytrial
                 copytrial = load(tmpFname, '-mat');
                 copytrial = copytrial.(sprintf('trial%d', p.trial.pldaps.iTrial));
@@ -122,8 +117,6 @@ p = beginExperiment(p);
                 clear copytrial
                 copytrial = load(fname);
             end
-            
-            disp(['after deepcopy save valid = ' num2str(isvalid(p.trial.reward.dev))])
             
             if p.defaultParameters.pldaps.save.mergedData
                 % store the complete trial struct to .data
@@ -277,27 +270,6 @@ p = beginExperiment(p);
     IOPort('CloseAll');
 
     sca;
-    
-% catch me
-%     if p.trial.eyelink.use
-%        pds.eyelink.finish(p); 
-%     end
-%     sca
-%     if p.trial.sound.use
-%         PsychPortAudio('Close')
-%     end
-%     % return cursor and command-line control
-%     ShowCursor
-%     ListenChar(0)
-%     disp(me.message)
-%     
-%     nErr = size(me.stack); 
-%     for iErr = 1:nErr
-%         fprintf('errors in %s line %d\r', me.stack(iErr).name, me.stack(iErr).line)
-%     end
-%     fprintf('\r\r')
-%     keyboard    
-% end
 
 end
 

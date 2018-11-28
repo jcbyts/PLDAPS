@@ -34,21 +34,6 @@ classdef pldaps < handle
         
         p.defaultParameters=params(defaults,defaultsNames);
         
-        %DEPRECIATED:   Use createRigPrefs.m to update rig prefs framework
-        if isField(p.defaultParameters,'pldaps.rigParameters')
-            error(['Storing rigPrefs within the .pldaps.rigParameters field is depreciated.\n',...
-                    '\tRun createRigPrefs.m to create updated preferences storage inline with PLDAPS ver. 4.2 (and beyond)'], [])
-                %             defaults{3}=load(p.defaultParameters.pldaps.rigParameters);
-                %             fn=fieldnames(defaults{3});
-                %             if length(fn)>1
-                %                 error('pldaps:pldaps', 'The rig default parameter struct should only have one fieldname');
-                %             end
-                %             defaults{3}=defaults{3}.(fn{1});
-                %             defaultsNames{3}=fn{1};
-                %
-                %             p.defaultParameters.addLevels(defaults(3),defaultsNames(3));
-        end
-        
         
         %handle input to the constructor
         %if an input is a struct, this is added to the defaultParameters. 
@@ -72,7 +57,11 @@ classdef pldaps < handle
             if sum(cellIndex)>1
                 error('pldaps:pldaps', 'Only one cell allowed as input.');
             end
-            p.conditions=varargin{cellIndex};
+            conds = varargin{cellIndex};
+            p.conditions=conds;
+            
+            % update constructor struct to include any unspecified modules
+            constructorStruct = mergeStruct(constructorStruct, pdsGetModuleStructFromConditions(conds));
         end
         
         if nargin>4

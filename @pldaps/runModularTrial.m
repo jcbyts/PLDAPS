@@ -81,5 +81,3 @@ end
 
 % --- Trial Cleanup
 runStateforModules(p,'trialCleanUpandSave',modules,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
-
-% end %runModularTrial
