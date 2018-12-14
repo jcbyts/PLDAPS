@@ -17,6 +17,10 @@ if ~p.trial.pldaps.nosave && p.trial.pldaps.save.trialTempfiles
     end
     try  
         save(fullfile(p.trial.session.dir,'TEMP',[p.trial.session.file(1:end-4) num2str(p.trial.pldaps.iTrial) p.trial.session.file(end-3:end)]),['trial' num2str(p.trial.pldaps.iTrial)]);
+        % This has to be wrapped in an evalc because the reward module
+        % prints out when it's saved for some reason
+%         evalc('save(fullfile(p.trial.session.dir,''TEMP'',[p.trial.session.file(1:end-4) num2str(p.trial.pldaps.iTrial) p.trial.session.file(end-3:end)]),[''trial'' num2str(p.trial.pldaps.iTrial)]);');
+        
     catch result
          warning('pldaps:saveTempFile','Failed to save temp file in %s',[p.trial.session.dir filesep 'TEMP'])
     end
