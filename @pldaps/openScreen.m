@@ -148,6 +148,8 @@ else
 	PsychImaging('AddTask', 'FinalFormatting', 'DisplayColorCorrection', 'LookupTable');
 end
 
+% %% Use offscreen window (for replay)
+% PsychImaging('AddTask', 'General', 'UseFastOffscreenWindows');
 
 %% Open double-buffered onscreen window with the requested stereo mode
 disp('****************************************************************')
