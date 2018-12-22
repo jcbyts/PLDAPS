@@ -169,7 +169,7 @@ pds.datapixx.adc.getData(p);
 pds.arrington.get(p);
 
 % get eyelink data (will override arrington)
-pds.eyelink.get(p);
+pds.eyelink.getQueue(p);
 
 
 %get plexon spikes
@@ -516,6 +516,13 @@ end
 %---------------------------------------------------------------------%
 % Eyelink specific:
 if p.trial.eyelink.use
+%     drained = 0;
+%     s = [];
+%     while ~drained
+%         [samples, events, drained] = Eyelink('GetQueuedData');
+%         s = [s samples];
+%     end
+% %      [samplesIn,eventsIn, p.trial.eyelink.drained] = Eyelink('GetQueuedData');
     [Q, rowId] = pds.eyelink.saveQueue(p);
     p.trial.eyelink.samples = Q;
     p.trial.eyelink.sampleIds = rowId; % I overwrite everytime because PDStrialTemps get saved after every trial if we for some unforseen reason ever need this for each trial
