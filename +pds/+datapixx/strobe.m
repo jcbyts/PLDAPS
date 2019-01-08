@@ -20,7 +20,7 @@ function timings=strobe(lowWord,highWord)
 if nargin < 2 
     highWord=0;
 end
-word=mod(lowWord, 2^6) + mod(highWord,2^6)*2^6;
+word=mod(lowWord, 2^7) + mod(highWord,2^7)*2^7;
 
 if nargout==0
     %first we set the bits without the strobe, to ensure they are all
@@ -43,11 +43,14 @@ if nargout==0
     Datapixx('RegWr');
 else
     t=nan(2,1);
-    oldPriority=Priority;
-    if oldPriority < MaxPriority('GetSecs')
-            Priority(MaxPriority('GetSecs'));
-    end
+%     oldPriority=Priority;
+%     if oldPriority < MaxPriority('GetSecs')
+%             Priority(MaxPriority('GetSecs'));
+%     end
     Datapixx('SetDoutValues',word);
+    Datapixx('RegWr');
+    
+    Datapixx('SetDoutValues',word); % set twice
     Datapixx('RegWr');
 
     Datapixx('SetDoutValues',2^16 + word);
@@ -64,9 +67,9 @@ else
     Datapixx('SetDoutValues',0)
     Datapixx('RegWr');
 
-    if Priority ~= oldPriority
-            Priority(oldPriority);
-    end
+%     if Priority ~= oldPriority
+%             Priority(oldPriority);
+%     end
     
     timings=[mean(t) dpTime diff(t)];
 end
