@@ -1,8 +1,8 @@
 function data = getPdsTrialData(PDS)
 % getPdsTrialData merges the conditions and data and outputs the parameters
-% and data for each trial. 
+% and data for each trial.
 % The hierarchy of parameters is like this:
-% data -> conditions -> initialParameters 
+% data -> conditions -> initialParameters
 
 if iscell(PDS)
     nPds = numel(PDS);
@@ -28,6 +28,10 @@ if iscell(PDS)
                 if isfield(data{k}(j), fnames{f})
                     tmp(tr0(k)+j).(fnames{f}) = data{k}(j).(fnames{f});
                 end
+            end
+            tmp(tr0(k)+j).pdsIndex = k;
+            if isfield(PDS{k}, 'PTB2OE')
+                tmp(tr0(k)+j).PTB2OE = PDS{k}.PTB2OE;
             end
         end
     end
@@ -67,11 +71,29 @@ else
         data(iTrial).pldaps.iTrial = iTrial;
     end
     
+    data(iTrial).pdsIndex = 1;
+    if isfield(PDS, 'PTB2OE')
+        data(iTrial).PTB2OE = PDS.PTB2OE;
+    end
+    
 end
 
-
+% reorder trials so they are sequential
 tstarts = arrayfun(@(x) x.timing.flipTimes(1), data);
 [~, ind] = sort(tstarts);
 data = data(ind);
 
-% data = cellfun(@(x,y) mergeStruct(x, y), A, PDS.data, 'uni', 0);
+
+% loop over fields and correct any empty modules
+fnames = fieldnames(data);
+for i = 1:numel(fnames)
+    %     fprintf('%s\n', fnames{i})
+    ixempty = arrayfun(@(x) isempty(x.(fnames{i})), data);
+    ixuse   = arrayfun(@(x) isfield(x, fnames{i}), data);
+    if any(ixempty) && any(ixuse) % module is empty on some trials
+        emptyTrials = find(ixempty);
+        for j = emptyTrials(:)'
+            data(j).(fnames{i}).use = false;
+        end
+    end
+end
