@@ -33,7 +33,7 @@ for j=1:nfiles
        if(result==-1)
           warning('pds:EyelinkGetFiles', ['receiving ' PDS.initialParametersMerged.eyelink.edfFile '.edf for pds file ' file ' failed!']) 
        else
-           display([num2str(j) ' out of ' num2str(nfiles) ' files received: ' PDS.initialParametersMerged.eyelink.edfFile '.edf for pds file ' file '.'])
+           display([num2str(j) ' out of ' num2str(nfiles) ' files received: ' PDS.initialParametersMerged.eyelink.edfFile '.edf for pds file ' file ''])
        end
         
 %     end

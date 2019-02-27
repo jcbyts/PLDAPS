@@ -26,7 +26,7 @@ if p.trial.eyelink.use
     %read from the buffer instead of clearing, must be carefull for long
     %iti 
     p.trial.eyelink.drained=false;
-%     pds.eyelink.getQueue(dv);
-    p.trial.eyelink.drained = pds.eyelink.clearBuffer(p.trial.eyelink.drained);
+    p = pds.eyelink.getQueue(p);
+%     p.trial.eyelink.drained = pds.eyelink.clearBuffer(p.trial.eyelink.drained);
 end
  

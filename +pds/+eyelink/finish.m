@@ -9,13 +9,19 @@ if nargin < 1
     return;
 end
 
+prevDir=pwd;
+
+datadir = p.trial.pldaps.dirs.data;
+
+cd(datadir)
+
 if p.trial.eyelink.use && Eyelink('IsConnected')
     % edfFile = fullfile(dv.el.edfFileLocation, dv.el.edfFile);
     edfFile = p.trial.eyelink.edfFile;
     file=p.trial.session.file;
     dirs=p.trial.session.dir;
     Eyelink('StopRecording');
-    Eyelink('CloseFile');
+    status = Eyelink('CloseFile');
     % download data file
     if p.trial.eyelink.saveEDF
         try
@@ -23,7 +29,7 @@ if p.trial.eyelink.use && Eyelink('IsConnected')
            if(result==-1)
               warning('pds:EyelinkGetFiles', ['receiving ' edfFile '.edf for pds file ' file ' failed!']);
            else
-               fprintf('EDF file received: %s.edf \n\tfor pds file: %s.', edfFile, file);
+               fprintf('EDF file received: %s.edf \n\tfor pds file: %s\n', edfFile, file);
            end
         catch rdf
             fprintf('Problem receiving EDF data file ''%s''\n', edfFile );
@@ -32,3 +38,4 @@ if p.trial.eyelink.use && Eyelink('IsConnected')
     Eyelink('Shutdown')
 end
 
+cd(prevDir);

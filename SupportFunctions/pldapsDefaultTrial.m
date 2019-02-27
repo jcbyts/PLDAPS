@@ -151,14 +151,8 @@ if p.trial.mouse.use
     p.trial.mouse.buttonPressSamples(:,p.trial.mouse.samples) = isMouseButtonDown';
     % Use as eyepos if requested
     if(p.trial.mouse.useAsEyepos)
-%         if p.trial.pldaps.eyeposMovAv==1
             p.trial.eyeX = p.trial.mouse.cursorSamples(1,p.trial.mouse.samples);
             p.trial.eyeY = p.trial.mouse.cursorSamples(2,p.trial.mouse.samples);
-%         else
-%             mInds=(p.trial.mouse.samples-p.trial.pldaps.eyeposMovAv+1):p.trial.mouse.samples;
-%             p.trial.eyeX = mean(p.trial.mouse.cursorSamples(1,mInds));
-%             p.trial.eyeY = mean(p.trial.mouse.cursorSamples(2,mInds));
-%         end
     end
 end
 
@@ -169,7 +163,7 @@ pds.datapixx.adc.getData(p);
 pds.arrington.get(p);
 
 % get eyelink data (will override arrington)
-pds.eyelink.get(p);
+pds.eyelink.getQueue(p);
 
 
 %get plexon spikes
@@ -193,14 +187,13 @@ if p.trial.pldaps.draw.grid.use
     Screen('DrawLines', p.trial.display.overlayptr, p.trial.pldaps.draw.grid.tick_line_matrix, 1, p.trial.display.clut.window, p.trial.display.ctr(1:2));
 end
 
-% t0 = GetSecs;
 % Framerate history
 if p.trial.pldaps.draw.framerate.use && p.trial.iFrame>2
     %update data
     p.trial.pldaps.draw.framerate.data=circshift(p.trial.pldaps.draw.framerate.data,-1);
     p.trial.pldaps.draw.framerate.data(end)=p.trial.timing.flipTimes(1,p.trial.iFrame-1)-p.trial.timing.flipTimes(1,p.trial.iFrame-2);
     %plot
-%     if p.trial.pldaps.draw.framerate.show
+    if p.trial.pldaps.draw.framerate.show
         %adjust y limit
         p.trial.pldaps.draw.framerate.sf.ylims=[0 max(max(p.trial.pldaps.draw.framerate.data), 2*p.trial.display.ifi)];
         %current ifi is solid black
@@ -211,10 +204,8 @@ if p.trial.pldaps.draw.framerate.use && p.trial.iFrame>2
         pds.pldaps.draw.screenPlot(p.trial.pldaps.draw.framerate.sf, p.trial.pldaps.draw.framerate.sf.xlims(2)*(0:0.25:1), zeros(1,5), p.trial.display.clut.blackbg, '.');
         %data are red dots
         pds.pldaps.draw.screenPlot(p.trial.pldaps.draw.framerate.sf, 1:p.trial.pldaps.draw.framerate.nFrames, p.trial.pldaps.draw.framerate.data', p.trial.display.clut.redbg, '.');
-%     end
+    end
 end
-% t1 = GetSecs - t0;
-% disp(t1*1e3)
 
 % Eye positon
 if p.trial.pldaps.draw.eyepos.use
@@ -288,13 +279,13 @@ end
 
 %setup a fields for the keyboard data
 p.trial.keyboard.samples = 0;
-p.trial.keyboard.samplesTimes=zeros(1,round(p.trial.pldaps.maxFrames*1.1));
-p.trial.keyboard.samplesFrames=zeros(1,round(p.trial.pldaps.maxFrames*1.1));
-p.trial.keyboard.pressedSamples=false(1,round(p.trial.pldaps.maxFrames*1.1));
-p.trial.keyboard.firstPressSamples = zeros(p.trial.keyboard.nCodes,round(p.trial.pldaps.maxFrames*1.1));
+p.trial.keyboard.samplesTimes        = zeros(1,round(p.trial.pldaps.maxFrames*1.1));
+p.trial.keyboard.samplesFrames       = zeros(1,round(p.trial.pldaps.maxFrames*1.1));
+p.trial.keyboard.pressedSamples      = false(1,round(p.trial.pldaps.maxFrames*1.1));
+p.trial.keyboard.firstPressSamples   = zeros(p.trial.keyboard.nCodes,round(p.trial.pldaps.maxFrames*1.1));
 p.trial.keyboard.firstReleaseSamples = zeros(p.trial.keyboard.nCodes,round(p.trial.pldaps.maxFrames*1.1));
-p.trial.keyboard.lastPressSamples = zeros(p.trial.keyboard.nCodes,round(p.trial.pldaps.maxFrames*1.1));
-p.trial.keyboard.lastReleaseSamples = zeros(p.trial.keyboard.nCodes,round(p.trial.pldaps.maxFrames*1.1));
+p.trial.keyboard.lastPressSamples    = zeros(p.trial.keyboard.nCodes,round(p.trial.pldaps.maxFrames*1.1));
+p.trial.keyboard.lastReleaseSamples  = zeros(p.trial.keyboard.nCodes,round(p.trial.pldaps.maxFrames*1.1));
 
 %setup a fields for the mouse data
 if p.trial.mouse.use
@@ -323,16 +314,16 @@ pds.behavior.reward.trialSetup(p);
 
 %%% prepare to plot framerate history on screen
 if p.trial.pldaps.draw.framerate.use
-    p.trial.pldaps.draw.framerate.nFrames=round(p.trial.pldaps.draw.framerate.nSeconds/p.trial.display.ifi);
-    p.trial.pldaps.draw.framerate.data=zeros(p.trial.pldaps.draw.framerate.nFrames,1); %holds the data
-    sf.startPos=round(p.trial.display.w2px'.*p.trial.pldaps.draw.framerate.location + [p.trial.display.pWidth/2 p.trial.display.pHeight/2]);
-    sf.size=p.trial.display.w2px'.*p.trial.pldaps.draw.framerate.size;
-    sf.window=p.trial.display.overlayptr;
-    sf.xlims=[1 p.trial.pldaps.draw.framerate.nFrames];
-    sf.ylims=  [0 2*p.trial.display.ifi];
-    sf.linetype='-';
+    p.trial.pldaps.draw.framerate.nFrames   = round(p.trial.pldaps.draw.framerate.nSeconds/p.trial.display.ifi);
+    p.trial.pldaps.draw.framerate.data      = zeros(p.trial.pldaps.draw.framerate.nFrames,1); %holds the data
+    sf.startPos = round(p.trial.display.w2px'.*p.trial.pldaps.draw.framerate.location + [p.trial.display.pWidth/2 p.trial.display.pHeight/2]);
+    sf.size     = p.trial.display.w2px'.*p.trial.pldaps.draw.framerate.size;
+    sf.window   = p.trial.display.overlayptr;
+    sf.xlims    = [1 p.trial.pldaps.draw.framerate.nFrames];
+    sf.ylims    = [0 2*p.trial.display.ifi];
+    sf.linetype = '-';
     
-    p.trial.pldaps.draw.framerate.sf=sf;
+    p.trial.pldaps.draw.framerate.sf = sf;
 end
 
 if p.trial.display.useGL
@@ -402,7 +393,7 @@ clocktime(1) = clocktime(1) - 2e3; % only keep last two digits of year
 assert((clocktime(1) > -1) & (clocktime(1) < 64), 'Something is up, or it is the year 2065')
 if p.trial.datapixx.use
     for ii = 1:6
-        p.trial.datapixx.unique_number_time(ii,:)=pds.datapixx.strobe(clocktime(ii));
+        p.trial.datapixx.unique_number_time(ii,:) = pds.datapixx.strobe(clocktime(ii));
     end
 end
 p.trial.unique_number = clocktime;    % trial identifier
@@ -516,6 +507,13 @@ end
 %---------------------------------------------------------------------%
 % Eyelink specific:
 if p.trial.eyelink.use
+%     drained = 0;
+%     s = [];
+%     while ~drained
+%         [samples, events, drained] = Eyelink('GetQueuedData');
+%         s = [s samples];
+%     end
+% %      [samplesIn,eventsIn, p.trial.eyelink.drained] = Eyelink('GetQueuedData');
     [Q, rowId] = pds.eyelink.saveQueue(p);
     p.trial.eyelink.samples = Q;
     p.trial.eyelink.sampleIds = rowId; % I overwrite everytime because PDStrialTemps get saved after every trial if we for some unforseen reason ever need this for each trial
