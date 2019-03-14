@@ -105,6 +105,9 @@ if any(p.trial.keyboard.firstPressQ)
 %         
         p.trial.reward.deliver();
 %         toc
+
+    elseif  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.nKey)
+        p.trial.flagNextTrial = true;
         % [P]ause
     elseif  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.pKey)
         p.trial.pldaps.quit = 1;
