@@ -86,14 +86,14 @@ function frameUpdate(p)
 [p.trial.keyboard.pressedQ, p.trial.keyboard.firstPressQ, firstRelease, lastPress, lastRelease]=KbQueueCheck(); % fast
 
 if p.trial.keyboard.pressedQ || any(firstRelease)
-    p.trial.keyboard.samples = p.trial.keyboard.samples+1;
-    p.trial.keyboard.samplesTimes(p.trial.keyboard.samples) = GetSecs;
-    p.trial.keyboard.samplesFrames(p.trial.keyboard.samples) = p.trial.iFrame;
-    p.trial.keyboard.pressedSamples(:,p.trial.keyboard.samples) = p.trial.keyboard.pressedQ;
-    p.trial.keyboard.firstPressSamples(:,p.trial.keyboard.samples) = p.trial.keyboard.firstPressQ;
-    p.trial.keyboard.firstReleaseSamples(:,p.trial.keyboard.samples) = firstRelease;
-    p.trial.keyboard.lastPressSamples(:,p.trial.keyboard.samples) = lastPress;
-    p.trial.keyboard.lastReleaseSamples(:,p.trial.keyboard.samples) = lastRelease;
+    p.trial.keyboard.samples                                            = p.trial.keyboard.samples+1;
+    p.trial.keyboard.samplesTimes(p.trial.keyboard.samples)             = GetSecs;
+    p.trial.keyboard.samplesFrames(p.trial.keyboard.samples)            = p.trial.iFrame;
+    p.trial.keyboard.pressedSamples(:,p.trial.keyboard.samples)         = p.trial.keyboard.pressedQ;
+    p.trial.keyboard.firstPressSamples(:,p.trial.keyboard.samples)      = p.trial.keyboard.firstPressQ;
+    p.trial.keyboard.firstReleaseSamples(:,p.trial.keyboard.samples)    = firstRelease;
+    p.trial.keyboard.lastPressSamples(:,p.trial.keyboard.samples)       = lastPress;
+    p.trial.keyboard.lastReleaseSamples(:,p.trial.keyboard.samples)     = lastRelease;
 end
 
 % Some standard PLDAPS key functions
@@ -112,6 +112,21 @@ if any(p.trial.keyboard.firstPressQ)
     elseif  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.pKey)
         p.trial.pldaps.quit = 1;
         ShowCursor;
+        
+	% [A] adjustment for the calibration
+    elseif p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.aKey)
+        
+        p.trial.calibration.adjustment.on = ~p.trial.calibration.adjustment.on;
+        if p.trial.calibration.adjustment.on
+            disp('CALIBRATION ADJUSTMENT ACTIVE')
+%             C = p.trial.calibration.adjustment.C;
+%             [p.trial.calibration.adjustment.gainX, p.trial.calibration.adjustment.gainY, ...
+%                 p.trial.calibration.adjustment.offsetX, p.trial.calibration.adjustment.offsetY, ...
+%                 p.trial.calibration.adjustment.theta] = calibrationMatrixToGains(C);
+            
+        else
+            disp('CALIBRATION ADJUSTMENT TURNED OFF')
+        end
 	
 	% [C]alibration
     elseif  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.cKey)
@@ -141,6 +156,103 @@ if any(p.trial.keyboard.firstPressQ)
     elseif  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.dKey)
         disp('stepped into debugger. Type return to start first trial...')
         keyboard %#ok<MCKBD>
+    end
+    
+    
+    if p.trial.calibration.adjustment.on
+        deltaCtrl = max(p.trial.keyboard.lastPressSamples(p.trial.keyboard.codes.Lctrl,:)) - max(p.trial.keyboard.lastReleaseSamples(p.trial.keyboard.codes.Lctrl,:));
+        deltaAlt = max(p.trial.keyboard.lastPressSamples(p.trial.keyboard.codes.Lalt,:)) - max(p.trial.keyboard.lastReleaseSamples(p.trial.keyboard.codes.Lalt,:));
+%         - p.trial.keyboard.lastPressSamples(p.trial.keyboard.codes.Lctrl,p.trial.keyboard.samples))
+        disp(deltaCtrl)
+        if deltaCtrl > 0
+            
+        % if Ctrl is down, adjust gains
+%         if  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.Lctrl)
+            disp('Ctrl Down')
+            % [Uarrow] shift vertical gain up
+            if  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.Uarrow)
+                
+                p.trial.calibration.adjustment.gainY = 1.05 * p.trial.calibration.adjustment.gainY;
+                disp('Gain Up')
+                % [Darrow] shift vertical gain down
+            elseif p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.Darrow)
+                disp('Gain Down')
+                p.trial.calibration.adjustment.gainY = 0.95 * p.trial.calibration.adjustment.gainY;
+                
+                % [Larrow] shift horizontal gain down
+            elseif p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.Larrow)
+                
+                p.trial.calibration.adjustment.gainX = 0.95 * p.trial.calibration.adjustment.gainX;
+                
+                % [Rarrow] shift horizontal gain up
+            elseif p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.Rarrow)
+                
+                p.trial.calibration.adjustment.gainX = 1.05 * p.trial.calibration.adjustment.gainX;
+                
+            end
+            
+            
+            % if Alt is down, adjust rotation
+        elseif deltaAlt > 0
+            
+            % [Larrow] shift offset left
+            if p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.Larrow)
+                disp('Rotate Right')
+                p.trial.calibration.adjustment.theta = p.trial.calibration.adjustment.theta + 1;
+                
+                % [Rarrow] shift offset right
+            elseif p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.Rarrow)
+                disp('Rotate Left')
+                p.trial.calibration.adjustment.theta = p.trial.calibration.adjustment.theta - 1;
+                
+            end
+            
+        else
+            
+            % [Uarrow] shift offset up
+            if  p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.Uarrow)
+                disp('Shift Up')
+                p.trial.calibration.adjustment.offsetY = p.trial.calibration.adjustment.offsetY + 5;
+                
+                % [Darrow] shift offset down
+            elseif p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.Darrow)
+                disp('Shift Down')
+                p.trial.calibration.adjustment.offsetY = p.trial.calibration.adjustment.offsetY - 5;
+                
+                % [Larrow] shift offset left
+            elseif p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.Larrow)
+                disp('Shift Left')
+                p.trial.calibration.adjustment.offsetX = p.trial.calibration.adjustment.offsetX - 5;
+                
+                % [Rarrow] shift offset right
+            elseif p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.Rarrow)
+                disp('Shift Right')
+                p.trial.calibration.adjustment.offsetX = p.trial.calibration.adjustment.offsetX + 5;
+                
+            elseif p.trial.keyboard.firstPressQ(p.trial.keyboard.codes.sKey)
+                c = p.trial.calibration.adjustment.C;
+                subj=p.defaultParameters.session.subject;
+                % get previous calibration matrix
+                cm = getpref('marmoview_calibration', subj);
+                
+                % update the calibration matrix depending on which eye is tracked
+                if isempty(cm)
+                    cm = c;
+                    cm(:,:,2) = c;
+                elseif p.defaultParameters.eyelink.use && p.defaultParameters.eyelink.useAsEyepos
+                    cm(:,:,p.defaultParameters.eyelink.eyeIdx) = c;
+                elseif p.defaultParameters.arrington.use && p.defaultParameters.arrington.useAsEyepos
+                    cm(:,:,p.defaultParameters.arrington.eyeIdx) = c;
+                end
+                
+                setpref('marmoview_calibration', subj, cm)
+                disp('saved new calibration matrix.')
+            end
+            
+        end
+        
+       
+        updateCalibrationMatrixFromGains(p);
     end
 end
 
@@ -174,6 +286,9 @@ pds.eyelink.getQueue(p);
 
 % save eye position at each frame
 p.trial.behavior.eyeAtFrame(:,p.trial.iFrame) = [p.trial.eyeX; p.trial.eyeY];
+
+% store eye position
+pds.calibration.trackRaw(p);
 
 % end %frameUpdate
 
@@ -215,6 +330,14 @@ if p.trial.pldaps.draw.eyepos.use
     Screen('Drawdots', p.trial.display.overlayptr, [p.trial.eyeX p.trial.eyeY]', ...
         p.trial.(sn).eyeW, p.trial.display.clut.eyepos, [0 0],0);
 end
+
+if p.trial.calibration.adjustment.on
+%     p.trial.calibration.adjustment.xy = p.trial.calibration.adjustment.raw*p.trial.calibration.adjustment.C;
+    
+    Screen('Drawdots', p.trial.display.overlayptr, p.trial.calibration.adjustment.xy', ...
+        p.trial.(sn).eyeW/2, p.trial.display.clut.greenbg, [0 0],0);
+end
+
 if p.trial.mouse.use && p.trial.pldaps.draw.cursor.use
     Screen('Drawdots',  p.trial.display.overlayptr,  p.trial.mouse.cursorSamples(1:2,p.trial.mouse.samples), ...
         p.trial.(sn).eyeW, p.trial.display.clut.cursor, [0 0],0);
@@ -344,7 +467,7 @@ end
 % clear the reward log
 p.trial.reward.clearlog();
 
-
+pds.calibration.setup(p);
 % end %trialSetup
 
 

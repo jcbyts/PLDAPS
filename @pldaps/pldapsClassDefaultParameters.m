@@ -243,4 +243,20 @@ function s=pldapsClassDefaultParameters(s)
 	'trialItiDraw', true, ...
 	'trialCleanUpandSave', true);
 
+% online calibration adjustments
+s.  calibration. adjustment. on         = false;
+s.  calibration. adjustment. gainX      = 1;
+s.  calibration. adjustment. gainY      = 1;
+s.  calibration. adjustment. offsetX    = 0;
+s.  calibration. adjustment. offsetY    = 0;
+s.  calibration. adjustment. theta      = 0;
+cosTh = cosd(s.calibration.adjustment.theta);
+sinTh = sind(s.calibration.adjustment.theta);
+s.  calibration. adjustment. R          = [cosTh -sinTh; sinTh cosTh; 0 0] .* [s.calibration.adjustment.gainX s.calibration.adjustment.gainX; s.calibration.adjustment.gainY s.calibration.adjustment.gainY; 0 0];
+s.  calibration. adjustment. S          = [0 0; 0 0; s.calibration.adjustment.offsetX s.calibration.adjustment.offsetY];
+s.  calibration. adjustment. C          = s.calibration.adjustment.R + s.calibration.adjustment.S;
+
+
+s.  ddpi.   use = false;
+
 end
