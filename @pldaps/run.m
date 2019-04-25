@@ -159,8 +159,8 @@ p = beginExperiment(p);
     
     pds.eyelink.finish(p);  % p =  ; These should be operating on pldaps class handles, thus no need for outputs. --tbc.
     pds.arrington.finish(p);
-    
-    p.trial.reward.close();
+    pds.behavior.reward.finish(p);
+
     
     pds.plexon.finish(p);
     if(p.defaultParameters.datapixx.use)

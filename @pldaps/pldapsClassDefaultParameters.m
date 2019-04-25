@@ -51,11 +51,12 @@ function s=pldapsClassDefaultParameters(s)
  s.	display.	stereoMode = 0;
  s. display.    crosstalk = 0;
  s.	display.	switchOverlayCLUTs = false;
- s.	display.	useOverlay = 1;
+ s.	display.	useOverlay = 0;
  s.	display.	viewdist = 57;
  s.	display.	widthcm = 63;
  s. display.    ipd = 6.5;
  s. display.    useGL = false; % flag for custom 3D rendering features
+ s. display.    disableDithering = false; % turn this on if you've checked it is working properly (e.g., LoadIdentityClut works)
 
 % Movie making moved to pds.pldapsMovie module
 
@@ -87,33 +88,20 @@ function s=pldapsClassDefaultParameters(s)
 % S.pumpRate = 10.0;                  % rate to deliver juice (ml/minute)
 % S.pumpDefVol = 0.005;               % default dispensing volume (ml)
 
- s. newEraSyringePump.  use      = true;
- s.	newEraSyringePump.	port     = '/dev/cu.usbserial';
+ s. newEraSyringePump.  use      = false; % assume it is not used
+ % default port depends on which system you are on
+ if IsLinux
+     s.	newEraSyringePump.	port     = '/dev/ttyUSB0';
+ elseif IsOSX
+     s.	newEraSyringePump.	port     = '/dev/cu.usbserial';
+ else
+     s.	newEraSyringePump.	port     = 'COM1';
+ end
  s.	newEraSyringePump.	diameter = 19.05;
  s.	newEraSyringePump.  rate     = 10;
- s.	newEraSyringePump.  vol      = 0.005;
- 
- % jake's rig
-%       alarmMode: 1
-%     allowNewDiameter: 1
-%             diameter: 38
-%         lowNoiseMode: 0
-%                 port: '/dev/ttyUSB0'
-%                 rate: 2900
-%          triggerMode: 'T2'
-%                  use: 1
-%          volumeUnits: 'ML'
- 
-% %s.	newEraSyringePump.
-%  s.	newEraSyringePump.	alarmMode = 1;
-%  s.	newEraSyringePump.	allowNewDiameter = false;
-%  s.	newEraSyringePump.	diameter = 38;
-%  s.	newEraSyringePump.	lowNoiseMode = 0;
-%  s.	newEraSyringePump.	port = '/dev/cu.usbserial';
-%  s.	newEraSyringePump.	rate = 2900;
-%  s.	newEraSyringePump.	triggerMode = 'T2';
-%  s.	newEraSyringePump.	use = false;
-%  s.	newEraSyringePump.	volumeUnits = 'ML';
+ s.	newEraSyringePump.  volume   = 1;
+ s.	newEraSyringePump.	triggerMode = 'T2';
+ s.	newEraSyringePump.	volumeUnits = 'UL';
 
 %s.	pldaps.
  s.	pldaps.	experimentAfterTrialsFunction = [ ];

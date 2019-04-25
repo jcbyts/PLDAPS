@@ -1,6 +1,8 @@
 function p = setup(p)
 % setup calibration adjustment
 
+C =[1 0; 0 1; 0 0]; % assume default calibration
+
 if p.trial.eyelink.use && p.trial.eyelink.useAsEyepos && p.trial.eyelink.useRawData
     if ~isfield(p.trial.eyelink, 'eyeIdx')
         eyeIdx = 1;

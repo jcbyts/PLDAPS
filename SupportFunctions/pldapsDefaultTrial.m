@@ -68,7 +68,7 @@ switch state
     case p.trial.pldaps.trialStates.experimentCleanUp
         
 %         fclose(p.trial.reward.dev);
-        p.trial.reward.delete();
+        p.trial.reward.close();
         
 end
 

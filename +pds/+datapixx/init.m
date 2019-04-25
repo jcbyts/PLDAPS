@@ -80,12 +80,6 @@ if p.trial.datapixx.use
             Datapixx('DisablePropixxCeilingMount');
         end
         
-        if isfield(p.trial.datapixx,'rb3d') && p.trial.datapixx.rb3d
-            Datapixx('SetVideoMode', 9); % Enable the overlay on the PPX CTRL
-            Datapixx('SetPropixxDlpSequenceProgram', 1); %, 1);
-            Datapixx('RegWrRd');
-        end
-
     end
     
     p.trial.datapixx.info.DatapixxFirmwareRevision = Datapixx('GetFirmwareRev');
@@ -153,46 +147,16 @@ if p.trial.display.useOverlay==1 % Datapixx overlay
                 y = interp1(x,p.trial.display.gamma.table(:,1), combinedClut(:));
                 % reshape the combined clut back to 512 x 3
                 combinedClut = reshape(y, sc);
-            elseif isField(p.trial.display.gamma, 'power')
-                combinedClut=combinedClut .^ p.trial.display.gamma.power;
-                
             end
         end
 
         % Retrieve/update extended Datapixx settings ("VideoStatus")
         p.trial.datapixx.videoStatus = Datapixx('GetVideoStatus');
 
-        % WARNING about LoadNormalizedGammaTable from Mario Kleiner:
-        % "Not needed, possibly harmful:
-        % The PsychImaging() setup code already calls LoadIdentityClut()
-        % which loads a proper gamma table. Depending on operating system
-        % and gpu the tables need to differ a bit to compensate for driver
-        % bugs. The LoadIdentityClut routine knows a couple of different
-        % tables for different buggy systems. The automatic test code in
-        % BitsPlusIdentityClutTest and BitsPlusImagingPipelinetest also
-        % loads an identity lut via LoadIdentityClut and tests if that lut
-        % is working correctly for your gpu ? and tries to auto-fix that lut
-        % via an automatic optimization procedure if it isn?t correct. With
-        % your ?LoadNormalized?? command you are overwriting that optimal
-        % and tested lut, so you could add distortions to the video signal
-        % that is sent to the datapixx. A wrong lut could even erroneously
-        % trigger display dithering and add random imperceptible noise to
-        % the displayed image ? at least that is what i observed on my
-        % MacBookPro with ati graphics under os/x 10.4.11.?
-        % (posted on Psychtoolbox forum, 3/9/2010)
-        %
-        % We don't seem to have this problem - jake 12/04/13
         
-        % Apply the clut
-        if p.trial.datapixx.videoStatus.mode == 9
-           % RB3d Overlay clut must be passed to Propixx via Datapixx()
-           Datapixx('SetVideoClut', combinedClut)
-           Datapixx('RegWrRd');
+        % Let Screen apply clut to target device (via 4th input == 2)
+        Screen('LoadNormalizedGammaTable', p.trial.display.ptr, combinedClut, 2);
         
-        else
-            % Let Screen apply clut to target device (via 4th input == 2)
-            Screen('LoadNormalizedGammaTable', p.trial.display.ptr, combinedClut, 2);            
-        end
     end
     
 elseif p.trial.display.useOverlay==2 % software overlay
@@ -263,22 +227,6 @@ elseif p.trial.display.useOverlay==2 % software overlay
     % Assign lookuptable data to texture:
     glTexImage2D(GL.TEXTURE_RECTANGLE_EXT, 0, p.trial.display.internalFormat, n, m, 0, GL.LUMINANCE, GL.FLOAT, single(combinedClut(n+1:end,:)));
     glBindTexture(GL.TEXTURE_RECTANGLE_EXT, 0);
-end
-
-
-% 3D crosstalk correction when using Propixx Rb3d  (...can operate independent of overlay)
-if isfield(p.trial.datapixx, 'crosstalk') && any(p.trial.datapixx.crosstalk(:))
-    Datapixx('SetPropixx3DCrosstalkRL', p.trial.datapixx.crosstalk(:,1));    % ...only takes scalar gain param
-    Datapixx('SetPropixx3DCrosstalkLR', p.trial.datapixx.crosstalk(:,end));    % ...only takes scalar gain param
-    disp('****************************************************************')
-    fprintf('Stereo Crosstalk correction implemented by Propixx firmware:\n');
-    fprintf('\tL-(gain*R): [')
-    fprintf('%05.2f, ', p.trial.datapixx.crosstalk(:,1).*100)
-    fprintf('\b\b]%%\n')
-    fprintf('\tR-(gain*L): [')
-    fprintf('%05.2f, ', p.trial.datapixx.crosstalk(:,end).*100)
-    fprintf('\b\b]%%\n')
-    fprintf('****************************************************************\n')
 end
 
 %% Final status checks & updates before flip and return
